@@ -1,0 +1,46 @@
+# Stage 1 Download the dependencies
+FROM eclipse-temurin:21-jdk-alpine AS dependencies
+
+RUN apk add --no-cache maven
+
+WORKDIR /app
+
+COPY pom.xml .
+
+RUN mvn dependency:go-offline 
+
+# Stage 2 Build the application
+
+FROM dependencies AS builder
+
+COPY src ./src
+
+RUN mvn clean package -DskipTests
+
+# Stage 3 Run the application
+
+FROM eclipse-temurin:21-jre-alpine AS runtime
+
+WORKDIR /app
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
+# Create non-root user
+RUN addgroup -g 1000 spring && \
+    adduser -D -u 1000 -G spring spring
+
+# Copy JAR from builder
+COPY --from=builder /app/target/*.jar app.jar
+
+# Change ownership
+RUN chown -R spring:spring /app
+
+USER spring:spring
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
