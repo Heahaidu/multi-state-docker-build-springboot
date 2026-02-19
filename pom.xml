@@ -55,7 +55,18 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+                <!-- Separate layers for more efficient copying. -->
+					<layers>
+						<enabled>true</enabled>
+					</layers>
+				</configuration>
+
             </plugin>
+			<plugin>
+				<groupId>org.graalvm.buildtools</groupId>
+				<artifactId>native-maven-plugin</artifactId>
+			</plugin>
         </plugins>
     </build>
 
