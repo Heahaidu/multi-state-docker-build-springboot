@@ -39,3 +39,8 @@ Multi-stage Dockerization of Spring Boot applications involves creating a Docker
 >     </configuration>
 > </plugin>
 > ```
+
+### Docker Slim
+```
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock dslim/slim build [IMAGE]
+```
